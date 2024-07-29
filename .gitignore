@@ -1,0 +1,11 @@
+.envrc
+
+*.beam
+*.ez
+erl_crash.dump
+
+backend/build
+backend/priv/static/style.css
+
+shared/build
+shared/node_modules

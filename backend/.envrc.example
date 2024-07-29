@@ -1,0 +1,13 @@
+export ENVIRONMENT="dev"
+
+export POSTGRES_USER="postgres"
+export POSTGRES_PASSWORD="postgres"
+export DATABASE_HOST="localhost"
+export DATABASE_PORT="5432"
+export DATABASE_NAME="kitchensink_$ENVIRONMENT"
+export DATABASE_URL="postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$DATABASE_HOST:$DATABASE_PORT/$DATABASE_NAME?sslmode=disable"
+export ERL_AFLAGS='-sasl errlog_type error'
+
+export OTEL_SERVICE_NAME="kitchensink"
+
+# Set WISP_SECRET_KEY_HERE
