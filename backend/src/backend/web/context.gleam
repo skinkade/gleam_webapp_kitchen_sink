@@ -8,8 +8,21 @@ pub type Services {
   Services(send_email: fn(EmailMessage) -> Result(Nil, String))
 }
 
+pub type Config {
+  Config(
+    app_name: String,
+    app_address: String,
+    ip_address_http_headers: List(String),
+  )
+}
+
 pub type AppContext {
-  AppContext(db: Connection, static_directory: String, services: Services)
+  AppContext(
+    db: Connection,
+    static_directory: String,
+    services: Services,
+    config: Config,
+  )
 }
 
 pub type RequestContext {

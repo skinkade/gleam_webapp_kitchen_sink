@@ -14,7 +14,10 @@ pub fn base_html(ctx: GlobalViewContext, children) {
         attribute.attribute("name", "viewport"),
         attribute.attribute("content", "width=device-width, initial-scale=1.0"),
       ]),
-      html.title([], ctx.page_title),
+      html.title([], case ctx.page_title == ctx.app_name {
+        True -> ctx.app_name
+        False -> ctx.page_title <> " | " <> ctx.app_name
+      }),
       html.link([
         attribute.rel("stylesheet"),
         attribute.href("/static/style.css"),
@@ -79,7 +82,7 @@ pub fn default(ctx: GlobalViewContext, content) {
                     attribute.class("btn btn-neutral drawer-button"),
                     attribute.for("page-drawer"),
                   ],
-                  [text("[Product Name]")],
+                  [text(ctx.app_name)],
                 ),
               ]),
               html.div([attribute.class("flex-0")], [auth_element]),

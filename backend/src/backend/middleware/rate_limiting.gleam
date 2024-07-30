@@ -1,8 +1,11 @@
+import backend/web/context
 import crabbucket/pgo as crabbucket
 import gleam/int
 import gleam/io
 import gleam/list
 import gleam/pgo.{type Connection}
+import gleam/result
+import gleam/string
 import wisp
 
 fn set_header_if_not_present(resp: wisp.Response, name: String, value: String) {
@@ -54,4 +57,27 @@ pub fn rate_limit(
       |> set_header_if_not_present(reset_header, next_reset |> int.to_string())
     }
   }
+}
+
+pub fn rate_limit_by_ip(
+  req: wisp.Request,
+  app_ctx: context.AppContext,
+  key_parts: List(String),
+  window_duration_ms: Int,
+  default_token_count: Int,
+  handler: fn() -> wisp.Response,
+) -> wisp.Response {
+  let header =
+    app_ctx.config.ip_address_http_headers
+    |> list.map(list.key_find(find: _, in: req.headers))
+    |> list.find(result.is_ok)
+  let ip = case header {
+    Ok(Ok(ip)) -> ip
+    _ -> "IP_NOT_FOUND"
+  }
+
+  let key = string.join(key_parts, "/") <> "/ip/" <> ip
+
+  use <- rate_limit(app_ctx.db, key, window_duration_ms, default_token_count)
+  handler()
 }

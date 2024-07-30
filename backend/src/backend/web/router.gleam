@@ -20,7 +20,8 @@ pub fn handle_request(req: Request, app_ctx: AppContext) -> Response {
   let route = wisp.path_segments(req)
   let view_ctx =
     global_view_context.GlobalViewContext(
-      page_title: "Kitchen Sink",
+      app_name: app_ctx.config.app_name,
+      page_title: app_ctx.config.app_name,
       current_route: "/" <> string.join(route, "/"),
       user: case user {
         None -> None

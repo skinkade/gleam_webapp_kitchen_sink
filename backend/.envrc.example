@@ -1,3 +1,6 @@
+export APP_NAME="KitchenSink"
+export APP_ADDRESS="http://localhost:8000"
+
 export ENVIRONMENT="dev"
 
 export POSTGRES_USER="postgres"
@@ -10,4 +13,6 @@ export ERL_AFLAGS='-sasl errlog_type error'
 
 export OTEL_SERVICE_NAME="kitchensink"
 
-# Set WISP_SECRET_KEY_HERE
+export IP_ADDRESS_HTTP_HEADERS="X-Forwarded-For"
+
+# Set WISP_SECRET_KEY here

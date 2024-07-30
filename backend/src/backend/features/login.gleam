@@ -1,3 +1,4 @@
+import backend/middleware/rate_limiting
 import backend/middleware/view_context
 import backend/models/user
 import backend/models/user_session
@@ -124,11 +125,23 @@ fn login(
   Ok(session)
 }
 
+const login_submission_rate_window = 300_000
+
+const login_ip_rate_limit = 10
+
 fn submit_login_form(
   req: Request,
   app_ctx: AppContext,
   req_ctx: RequestContext,
 ) -> Response {
+  use <- rate_limiting.rate_limit_by_ip(
+    req,
+    app_ctx,
+    ["login", "submit"],
+    login_submission_rate_window,
+    login_ip_rate_limit,
+  )
+
   let view_ctx = view_context.get("Login", req_ctx)
   use formdata <- wisp.require_form(req)
 

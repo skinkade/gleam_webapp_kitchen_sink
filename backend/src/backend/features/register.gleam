@@ -1,3 +1,4 @@
+import backend/middleware/rate_limiting
 import backend/middleware/view_context
 import backend/models/pending_registration
 import backend/types/email.{type EmailAddress}
@@ -54,11 +55,23 @@ fn register_form(req_ctx) -> Response {
   |> wisp.html_response(200)
 }
 
+const registration_submission_rate_window = 300_000
+
+const registration_ip_rate_limit = 5
+
 fn submit_register_form(
   req: Request,
   app_ctx: AppContext,
   req_ctx: RequestContext,
 ) -> Response {
+  use <- rate_limiting.rate_limit_by_ip(
+    req,
+    app_ctx,
+    ["register", "submit"],
+    registration_submission_rate_window,
+    registration_ip_rate_limit,
+  )
+
   let view_ctx = view_context.get("Register", req_ctx)
   use formdata <- wisp.require_form(req)
 
@@ -76,7 +89,11 @@ fn submit_register_form(
       case pending_registration.create(app_ctx.db, email) {
         Ok(pending_registration_token) -> {
           let email_attempt =
-            create_invite_email(email, pending_registration_token)
+            create_invite_email(
+              app_ctx.config.app_address,
+              email,
+              pending_registration_token,
+            )
             |> app_ctx.services.send_email()
           case email_attempt {
             Error(e) -> {
@@ -114,10 +131,11 @@ fn submit_register_form(
 }
 
 pub fn create_invite_email(
+  app_address: String,
   address: EmailAddress,
   token: pending_registration.PendingRegistrationToken,
 ) {
-  let link = "http://localhost:8000/register/confirm?token=" <> token.value
+  let link = app_address <> "/register/confirm?token=" <> token.value
   let body =
     html.html([attribute.attribute("lang", "en")], [
       html.head([], [
